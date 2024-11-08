@@ -133,5 +133,8 @@ def wandb_tabularize_loss(entries):
 
 
 def free_memory():
-    torch.cuda.empty_cache()
-    torch.cuda.ipc_collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
+    else:
+        pass

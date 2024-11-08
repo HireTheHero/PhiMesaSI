@@ -9,7 +9,7 @@ from transformers import AdamW, GPT2LMHeadModel, GPT2Tokenizer
 import yaml
 import wandb
 
-from objective import bigphi_loss
+from objective import bigphi_loss, conditional_entropy_loss
 from preprocess import preprocess
 from utils import (
     free_memory,
@@ -79,7 +79,8 @@ def train(args):
             # print(inputs.shape, labels.shape)
             # torch.Size([1, 511]) torch.Size([1, 511])
             outputs = model(inputs, labels=labels)
-            loss_ce = outputs.loss
+            # loss_ce = outputs.loss
+            loss_ce = conditional_entropy_loss(outputs.logits, labels)
             # Calculate mutual information loss (this is a simplified version)
             # loss_mi = mutual_information_loss(model, inputs, labels)
             loss_phi = bigphi_loss(model, config, inputs, labels)
@@ -185,7 +186,8 @@ def train_batch(args):
             # print(inputs.shape, labels.shape)
             # torch.Size([8, 511]) torch.Size([8, 511])
             outputs = model(inputs, labels=labels)
-            loss_ce = outputs.loss
+            # loss_ce = outputs.loss
+            loss_ce = conditional_entropy_loss(outputs.logits, labels)
             loss_phi = bigphi_loss(model, config, inputs, labels)
             # Combine losses
             loss = loss_ce + loss_phi

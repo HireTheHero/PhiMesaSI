@@ -7,8 +7,8 @@ from torch.nn import functional as F
 from utils import free_memory
 
 
-# Cross-entropy
-## Definition
+# Cross-entropy / Conditional entropy
+## Entropy
 def entropy_loss(input_tensor):
     lsm = nn.LogSoftmax()
     log_probs = lsm(input_tensor)
@@ -18,16 +18,35 @@ def entropy_loss(input_tensor):
     return entropy
 
 
-## Loss function
+## Cross entropy
 def cross_entropy_loss(outputs, labels):
     return F.cross_entropy(outputs.view(-1, outputs.size(-1)), labels.view(-1))
 
 
+## Conditional entropy
+def conditional_entropy_loss(logits, labels):
+    # Flatten the batch and sequence dimensions
+    batch_size, seq_len, vocab_size = logits.shape
+    logits = logits.view(-1, vocab_size)
+    labels = labels.view(-1)
+
+    # Compute the log probabilities
+    log_probs = F.log_softmax(logits, dim=-1)
+
+    # Gather the log probabilities for the true labels
+    label_log_probs = log_probs[range(logits.size(0)), labels]
+
+    # Compute the conditional entropy
+    cond_entropy = -label_log_probs.mean()
+    return cond_entropy
+
+
 # Phi
 ## mutual information loss function
+# def mutual_information_loss(outputs_logits, outputs):
+#     return cross_entropy_loss(outputs_logits, outputs) - entropy_loss(outputs_logits)
 def mutual_information_loss(outputs_logits, outputs):
-    return cross_entropy_loss(outputs_logits, outputs) - entropy_loss(outputs_logits)
-
+    return conditional_entropy_loss(outputs_logits, outputs) - entropy_loss(outputs_logits)
 
 ## Phi
 def bigphi_loss(model, config, inputs, outputs):
