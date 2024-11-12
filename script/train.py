@@ -132,9 +132,9 @@ def train(args):
 
         logger.info(f"Epoch {epoch+1}/{args.epochs} completed.")
         # save model with datetime string
+        dt_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         os.makedirs(args.output_dir, exist_ok=True)
         os.makedirs(f"{args.output_dir}/{dt_str}", exist_ok=True)
-        dt_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         model.save_pretrained(f"{args.output_dir}/model_{dt_str}_epoch{i}.pt")
         if args.log_wandb:
             wandb.save(f"{args.output_dir}/model_{dt_str}_epoch{i}.pt")
